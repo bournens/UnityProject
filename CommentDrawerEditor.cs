@@ -33,22 +33,13 @@ public class CommentDrawerEditor : PropertyDrawer
         // Save the foldout state to EditorPrefs
         EditorPrefs.SetBool(foldoutId, foldout);
 
-        // Calculate the position for the property field
-        Rect propertyFieldPosition = new Rect(position.x, position.y + EditorGUIUtility.singleLineHeight, position.width, EditorGUIUtility.singleLineHeight);
-
         if (foldout)
         {
-            // Indent the variables inside the group
-            EditorGUI.indentLevel++;
-
-            // Draw the property fields for the variables inside the group
-            EditorGUI.PropertyField(propertyFieldPosition, property, true);
-
             // Initialize the custom GUIStyle with larger text
             if (commentStyle == null)
             {
                 commentStyle = new GUIStyle(EditorStyles.label);
-                commentStyle.fontSize = 13; // Set the font size to 12 (you can adjust as needed)
+                commentStyle.fontSize = 13; // Set the font size to 13 (you can adjust as needed)
                 commentStyle.wordWrap = true;
                 commentStyle.normal.textColor = Color.white; // Set the text color to white
             }
@@ -57,14 +48,23 @@ public class CommentDrawerEditor : PropertyDrawer
             GUIContent commentContent = new GUIContent(comment);
             float commentHeight = commentStyle.CalcHeight(commentContent, position.width);
 
-            // Center the comment text vertically within the HelpBox
-            Rect commentPosition = new Rect(position.x, position.y + EditorGUIUtility.singleLineHeight * 2.0f, position.width, commentHeight);
+            // Calculate the position for the comment text
+            Rect commentPosition = new Rect(position.x, position.y + EditorGUIUtility.singleLineHeight, position.width, commentHeight);
 
             // Draw the HelpBox background
             GUI.Box(commentPosition, GUIContent.none, EditorStyles.helpBox);
 
             // Draw the comment text using the custom GUIStyle
             EditorGUI.LabelField(commentPosition, comment, commentStyle);
+
+            // Calculate the position for the property field
+            Rect propertyFieldPosition = new Rect(position.x, position.y + EditorGUIUtility.singleLineHeight + commentHeight, position.width, EditorGUIUtility.singleLineHeight);
+
+            // Indent the variables inside the group
+            EditorGUI.indentLevel++;
+
+            // Draw the property fields for the variables inside the group
+            EditorGUI.PropertyField(propertyFieldPosition, property, true);
 
             // Restore the indent level
             EditorGUI.indentLevel--;
@@ -86,12 +86,12 @@ public class CommentDrawerEditor : PropertyDrawer
 
             // Increase the property height to make space for the comment description and collapsible group,
             // and add extra padding to create some space between the comment and the next variable
-            return base.GetPropertyHeight(property, label) + EditorGUIUtility.singleLineHeight * 3.0f + commentHeight;
+            return base.GetPropertyHeight(property, label) + EditorGUIUtility.singleLineHeight + commentHeight;
         }
         else
         {
             // Only show the property field height without the comment description
-            return base.GetPropertyHeight(property, label);
+            return foldout ? base.GetPropertyHeight(property, label) + EditorGUIUtility.singleLineHeight : EditorGUIUtility.singleLineHeight;
         }
     }
 }
